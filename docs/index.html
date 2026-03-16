@@ -5,22 +5,257 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ダイエットトレンドウォッチャー</title>
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif;
-      display: flex; align-items: center; justify-content: center;
-      min-height: 100vh; margin: 0; background: #f5f7fa;
-      color: #555; text-align: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN',
+                   'Noto Sans JP', sans-serif;
+      background: #f5f7fa;
+      color: #1a1a2e;
+      line-height: 1.7;
+      min-height: 100vh;
     }
-    .setup { padding: 40px; }
-    h1 { color: #667eea; font-size: 1.8rem; margin-bottom: 12px; }
-    p { font-size: 1rem; line-height: 1.8; }
+
+    /* ---- ヘッダー ---- */
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px 24px 32px;
+      text-align: center;
+    }
+    .header-icon { font-size: 48px; margin-bottom: 12px; }
+    .header h1 {
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+    .header-sub { opacity: 0.9; font-size: 0.95rem; }
+    .update-time {
+      display: inline-block;
+      margin-top: 16px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 20px;
+      padding: 6px 18px;
+      font-size: 0.85rem;
+    }
+
+    /* ---- 統計バー ---- */
+    .stats-bar {
+      background: white;
+      border-bottom: 1px solid #e8ecf0;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 0.85rem;
+      color: #555;
+    }
+    .stats-bar .total {
+      font-weight: 700;
+      color: #667eea;
+      font-size: 1rem;
+    }
+    .stat-item {
+      background: #f0f2f8;
+      border-radius: 12px;
+      padding: 4px 12px;
+    }
+
+    /* ---- メインコンテンツ ---- */
+    .main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 16px 64px;
+    }
+
+    /* ---- カード ---- */
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      border: 1px solid #edf0f7;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .card:hover {
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+      transform: translateY(-2px);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .source-badge {
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+      letter-spacing: 0.3px;
+      flex-shrink: 0;
+    }
+    .article-date {
+      font-size: 0.8rem;
+      color: #888;
+    }
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+    .card-title a {
+      color: #1a1a2e;
+      text-decoration: none;
+    }
+    .card-title a:hover {
+      color: #667eea;
+    }
+    .keywords {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .kw-tag {
+      background: #f0f2ff;
+      color: #667eea;
+      font-size: 0.75rem;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+    .summary {
+      font-size: 0.92rem;
+      color: #444;
+      line-height: 1.8;
+      margin-bottom: 16px;
+      padding: 14px 16px;
+      background: #f8f9fc;
+      border-left: 3px solid #667eea;
+      border-radius: 0 8px 8px 0;
+    }
+    .read-more {
+      font-size: 0.85rem;
+      color: #667eea;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .read-more:hover { text-decoration: underline; }
+
+    /* ---- 空の状態 ---- */
+    .empty-state {
+      text-align: center;
+      padding: 80px 24px;
+      color: #888;
+    }
+    .empty-icon { font-size: 64px; margin-bottom: 16px; }
+
+    /* ---- フッター ---- */
+    .footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 0.8rem;
+      color: #aaa;
+      border-top: 1px solid #e8ecf0;
+    }
+
+    @media (max-width: 600px) {
+      .card { padding: 18px; }
+      .header { padding: 28px 16px 24px; }
+    }
   </style>
 </head>
 <body>
-  <div class="setup">
-    <div style="font-size:64px;margin-bottom:16px">🥗</div>
-    <h1>ダイエットトレンドウォッチャー</h1>
-    <p>セットアップ中です。<br>GitHub Actionsを設定すると毎朝8時に自動更新されます。</p>
-  </div>
+
+<header class="header">
+  <div class="header-icon">🥗</div>
+  <h1>ダイエットトレンドウォッチャー</h1>
+  <p class="header-sub">5サイトを毎朝8時に巡回 ✕ AIで自動要約</p>
+  <div class="update-time">最終更新: 2026年03月16日 15:27 JST</div>
+</header>
+
+<div class="stats-bar">
+  <span class="total">本日 4件の記事をキャッチ</span>
+  <span class="stat-item"><strong>Fytte</strong> 4件</span>
+</div>
+
+<main class="main">
+  
+            <div class="card">
+                <div class="card-header">
+                    <span class="source-badge" style="background:#d81b60">Fytte</span>
+                    <span class="article-date">2025.05.19</span>
+                </div>
+                <h2 class="card-title">
+                    <a href="https://fytte.jp/news/diet/220208/" target="_blank" rel="noopener">Diet2025年の注目アイテムが決定！「FYTTEダイエット＆ヘルス大賞2025」のランキングを発表！2025.05.19</a>
+                </h2>
+                <div class="keywords"><span class="kw-tag">ダイエット</span></div>
+                <div class="summary">2025年の「FYTTEダイエット＆ヘルス大賞」では、全21部門の注目アイテムが発表され、読者の投票によって選ばれた人気商品が紹介されました。今年は「植物性・植物系ヨーグルト部門」や「プラントベースフード部門」など新設部門があり、健康志向の高い商品が多くランクインしています。特に、機能性ドリンクはおいしさと健康を両立させた商品が注目され、忙しい日常でも取り入れやすい点が評価されています。ダイエットや健康に関心のある方は、これらのアイテムをチェックすることをお勧めします。</div>
+                <a class="read-more" href="https://fytte.jp/news/diet/220208/" target="_blank" rel="noopener">
+                    記事を読む →
+                </a>
+            </div>
+            
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="source-badge" style="background:#d81b60">Fytte</span>
+                    <span class="article-date">2026.03.13</span>
+                </div>
+                <h2 class="card-title">
+                    <a href="https://fytte.jp/news/diet/225829/" target="_blank" rel="noopener">2026.03.13Diet春の苦味でデトックス！ 年度末の忙しい時期に食べたい「ゆる養生」でご自愛ごはん #Omezaトーク</a>
+                </h2>
+                <div class="keywords"><span class="kw-tag">デトックス</span></div>
+                <div class="summary">春はデトックスに最適な季節であり、特に苦味のある春野菜が肝機能をサポートし、冬の蓄積物を排出するのに役立ちます。具体的には、菜の花やたけのこなどが推奨されており、これらの野菜には解毒や新陳代謝を促進する成分が含まれています。忙しい年度末に「ゆる養生」として、手軽に春野菜を取り入れることで、心身の健康を保ちながら春を楽しむことができます。</div>
+                <a class="read-more" href="https://fytte.jp/news/diet/225829/" target="_blank" rel="noopener">
+                    記事を読む →
+                </a>
+            </div>
+            
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="source-badge" style="background:#d81b60">Fytte</span>
+                    
+                </div>
+                <h2 class="card-title">
+                    <a href="https://fytte.jp/news/author/eico" target="_blank" rel="noopener">ダイエットコーチ EICOダイエットコーチ日本初のダイエットコーチとして、マンツーマンで700人以上のダイエットを指導。自身も21歳のとき、4...</a>
+                </h2>
+                <div class="keywords"><span class="kw-tag">ダイエット</span></div>
+                <div class="summary">ダイエットコーチEICOは、日本初のダイエットコーチとして700人以上の指導を行い、自身も21歳で20kgの減量に成功した経験を持つ。リバウンド率ゼロを目指し、個々の生活スタイルや体質に基づいたマンツーマンのコーチングを提供しており、特に下半身痩せに定評がある。著書も多数あり、ダイエットに関する知識や方法を広めている。</div>
+                <a class="read-more" href="https://fytte.jp/news/author/eico" target="_blank" rel="noopener">
+                    記事を読む →
+                </a>
+            </div>
+            
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="source-badge" style="background:#d81b60">Fytte</span>
+                    
+                </div>
+                <h2 class="card-title">
+                    <a href="https://fytte.jp/news/author/kkoyama" target="_blank" rel="noopener">小山 圭介ダイエットトレーナーダイエットトレーナー＆メンタルコーチ。これまで２万人以上にダイエット指導を行う。メンタル・食事・運動...</a>
+                </h2>
+                <div class="keywords"><span class="kw-tag">ダイエット</span></div>
+                <div class="summary">小山圭介は、2万人以上にダイエット指導を行ってきたダイエットトレーナーで、メンタル、食事、運動を組み合わせたアプローチを提案しています。彼のオンラインサロンでは、仲間と共に運動することでダイエットの成功者が続出しており、具体的な方法として「バスタオルダイエット」などのエクササイズも紹介されています。ダイエットを成功させるためには、自分に合った方法を見つけることが重要です。</div>
+                <a class="read-more" href="https://fytte.jp/news/author/kkoyama" target="_blank" rel="noopener">
+                    記事を読む →
+                </a>
+            </div>
+            
+</main>
+
+<footer class="footer">
+  <p>キーワード数: 201語 ／ 対象サイト: PR TIMES・Fytte・Nikkei XTrend・厚生労働省（2サイト）</p>
+  <p style="margin-top:4px">Powered by Python + OpenAI GPT-4o mini + GitHub Actions + GitHub Pages</p>
+</footer>
+
 </body>
 </html>
