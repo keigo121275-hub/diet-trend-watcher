@@ -1,0 +1,41 @@
+name: 毎朝8時 ダイエットトレンド収集
+
+on:
+  schedule:
+    # 毎朝8:00 JST = 23:00 UTC（前日）
+    - cron: "0 23 * * *"
+  # 手動実行ボタン（テスト用）
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  scrape-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Python 3.11 をセットアップ
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: 依存パッケージをインストール
+        run: pip install -r requirements.txt
+
+      - name: スクレイピング・要約・HTML生成を実行
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python scraper.py
+
+      - name: 生成したHTMLをコミット＆プッシュ
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/index.html
+          git diff --staged --quiet || git commit -m "chore: $(date +'%Y-%m-%d') ダイエットトレンド自動更新"
+          git push
